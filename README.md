@@ -14,23 +14,13 @@ and copy your model in this folder. You will have then to convert it into a C++ 
 xxd -i kanji_model.tflite > kanji_model_data.h
 ```
 
-## Compilation
+## Prerequired
 
 To compile into a WASM execute file. You will have to first clone :
 
 - [enscripten](https://github.com/emscripten-core/emsdk.git)
-- [tensorflow](https://github.com/tensorflow/tensorflow)
-- [flatbuffers](https://github.com/google/flatbuffers.git)
 
 First you will have to install enscripten, that will allows to compile the program into a WASM.
-
-Then build them to be able to use them on compiling into WASM.
-
-```sh
-mkdir build_opencv
-cd build_opencv
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON ../opencv
-```
 
 If you have some errors, check if you have to install some libraries :
 
@@ -39,15 +29,38 @@ If you have some errors, check if you have to install some libraries :
 brew cmake install webp libopenjp2 zlib openjpeg libtiff tbb ittnotify protobuf flatbuffers opencv
 ```
 
-Then retry once again. If no errors have been thrown, you can build openCv :
+## Conan
+
+### Installation
 
 ```sh
-emmake make -j4
-emmake make install
+pip install conan
 ```
 
-You can finally compile the program with :
+### Setting profile
 
 ```sh
-emcc kanji_recognition.cpp -o kanjiRecognition.js -s EXPORTED_FUNCTIONS='["_runModel"]' -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" -s WASM=1 -I"tensorflow" -I"flatbuffers/include" -I"/opt/homebrew/Cellar/opencv@3/3.4.20/include" -I"/opt/homebrew/Cellar/opencv@3/3.4.20/lib" -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -L"tensorflow" -ltensorflowlite -std=c++17
+conan profile detect
 ```
+
+### Install dependencies
+
+```sh
+conan install . --build=missing
+```
+
+You will have to update on the `CMakeLists.txt` file the path of emscripten (l.10)
+
+### Configure with CMake
+
+```sh
+emcmake cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+```
+
+### Build with Emscripten
+
+```sh
+emmake make -C build
+```
+
+it will then generate a `.wasm` and `.js` files that you can use on your Javascript application 🎉
