@@ -1,6 +1,6 @@
-#include "tensorflow/tensorflow/lite/interpreter.h"
-#include "tensorflow/tensorflow/lite/kernels/register.h"
-#include "tensorflow/tensorflow/lite/model.h"
+#include <tensorflow/lite/interpreter.h>
+#include <tensorflow/lite/kernels/register.h>
+#include <tensorflow/lite/model.h>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -15,6 +15,7 @@ std::vector<float> preprocessImage(const std::string& imagePath) {
     return std::vector<float>(img.begin<float>(), img.end<float>());
 }
 
+extern "C" {
 int runModel(const std::string& imagePath) {
     // Load the model from memory
     auto model = tflite::FlatBufferModel::BuildFromBuffer(
@@ -51,4 +52,5 @@ int runModel(const std::string& imagePath) {
     std::cout << "Prediction: " << outputTensor[0] << std::endl;
 
     return 0;
+}
 }
